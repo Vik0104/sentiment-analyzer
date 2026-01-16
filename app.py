@@ -11,6 +11,8 @@ Features:
 - Executive Summary & Alerts
 """
 
+__version__ = "1.0.0"
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -792,3 +794,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # Display version in sidebar footer
+    st.sidebar.markdown("---")
+    st.sidebar.caption(f"Version {__version__}")
