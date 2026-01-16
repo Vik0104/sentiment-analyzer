@@ -1,0 +1,101 @@
+review_id,date,rating,category,product_name,review_text,verified_purchase
+1,2024-01-05,5,Fashion,Classic Cotton T-Shirt,"Absolutely love this shirt! The quality is amazing and it fits perfectly. True to size and the fabric is so soft. Will definitely buy more colors!",Yes
+2,2024-01-06,1,Fashion,Classic Cotton T-Shirt,"Very disappointed. The shirt arrived with a hole in it and the color looks nothing like the picture. Requested a refund immediately.",Yes
+3,2024-01-07,4,Fashion,Classic Cotton T-Shirt,"Good quality shirt, but runs a bit small. I'd recommend ordering one size up. The material is nice and soft though.",Yes
+4,2024-01-08,5,Electronics,Wireless Bluetooth Earbuds,"Best earbuds I've ever owned! The sound quality is incredible and battery life lasts all day. Pairing was super easy too.",Yes
+5,2024-01-09,2,Electronics,Wireless Bluetooth Earbuds,"Sound quality is okay but one earbud stopped working after just 2 weeks. Customer service was unhelpful when I tried to get a replacement.",Yes
+6,2024-01-10,3,Electronics,Wireless Bluetooth Earbuds,"Decent earbuds for the price. Connection drops occasionally but overall they work fine. Nothing special but not terrible either.",Yes
+7,2024-01-11,5,Beauty,Hydrating Face Serum,"This serum is a game changer! My skin has never looked better. No irritation and it absorbs quickly. Highly recommend for dry skin.",Yes
+8,2024-01-12,1,Beauty,Hydrating Face Serum,"Caused terrible breakouts on my sensitive skin. Had to stop using after 3 days. Very disappointing for the price.",Yes
+9,2024-01-13,4,Beauty,Hydrating Face Serum,"Good serum, nice texture and pleasant scent. Haven't seen dramatic results yet but my skin feels more hydrated.",Yes
+10,2024-01-14,5,Home,Stainless Steel Water Bottle,"Perfect water bottle! Keeps drinks cold for 24 hours. No leaks and the design is sleek. Worth every penny.",Yes
+11,2024-01-15,2,Home,Stainless Steel Water Bottle,"Arrived dented and scratched. The packaging was terrible - just thrown in a box with no protection. Disappointed.",Yes
+12,2024-01-16,4,Home,Stainless Steel Water Bottle,"Great bottle, keeps water cold all day. A bit heavy but that's expected for insulated bottles. Good value.",Yes
+13,2024-01-17,1,Fashion,Slim Fit Jeans,"Worst jeans ever! Size chart is completely wrong. These run at least 2 sizes smaller than advertised. False advertising!",Yes
+14,2024-01-18,5,Fashion,Slim Fit Jeans,"Love these jeans! Perfect fit and great quality denim. The stretch is just right and they look expensive.",Yes
+15,2024-01-19,3,Fashion,Slim Fit Jeans,"Okay jeans, nothing special. Quality is decent but shipping took forever - almost 3 weeks to arrive.",Yes
+16,2024-01-20,5,Electronics,Smart Watch Pro,"Amazing smartwatch! The display is gorgeous and all features work perfectly. Battery lasts 4 days. Best purchase this year.",Yes
+17,2024-01-21,2,Electronics,Smart Watch Pro,"Screen cracked within a month of normal use. For this price, I expected better durability. Returning for refund.",Yes
+18,2024-01-22,4,Electronics,Smart Watch Pro,"Great smartwatch overall. Setup was a bit confusing at first but once configured, it works beautifully. Good value.",Yes
+19,2024-01-23,5,Beauty,Vitamin C Brightening Cream,"This cream is fantastic! My dark spots have faded significantly after just 4 weeks. Will repurchase for sure.",Yes
+20,2024-01-24,2,Beauty,Vitamin C Brightening Cream,"Strong chemical smell and caused redness. Product quality doesn't match the premium price at all.",Yes
+21,2024-01-25,4,Beauty,Vitamin C Brightening Cream,"Good cream, absorbs well and doesn't feel greasy. Subtle improvement in skin brightness. Would recommend.",Yes
+22,2024-01-26,1,Home,Memory Foam Pillow,"Terrible quality! Lost its shape after one week and smells strongly of chemicals. Complete waste of money.",Yes
+23,2024-01-27,5,Home,Memory Foam Pillow,"Best pillow ever! Finally sleeping through the night. Perfect firmness and no neck pain anymore.",Yes
+24,2024-01-28,3,Home,Memory Foam Pillow,"Average pillow. A bit too firm for my liking but shipping was fast. May need time to break in.",Yes
+25,2024-02-01,4,Fashion,Running Shoes Elite,"Comfortable shoes for running! Good cushioning and breathable material. Only complaint is the sizing runs slightly large.",Yes
+26,2024-02-02,5,Fashion,Running Shoes Elite,"Perfect running shoes! Light as a feather and super comfortable. My new go-to for marathon training.",Yes
+27,2024-02-03,2,Fashion,Running Shoes Elite,"Sole started coming apart after just 2 months. Expected better durability from a premium brand. Customer support was slow.",Yes
+28,2024-02-04,5,Electronics,Portable Charger 20000mAh,"Lifesaver! Charges my phone 5 times over. Fast charging works great. Compact design fits in my pocket.",Yes
+29,2024-02-05,3,Electronics,Portable Charger 20000mAh,"Works as expected but heavier than advertised. Charges devices well but not great for travel due to weight.",Yes
+30,2024-02-06,1,Electronics,Portable Charger 20000mAh,"Stopped working after 1 month. Tried contacting customer service but no response. Avoid this product!",Yes
+31,2024-02-07,5,Beauty,Anti-Aging Eye Cream,"Miracle cream! Reduced my fine lines visibly in 3 weeks. Gentle formula, no irritation. Worth the investment.",Yes
+32,2024-02-08,2,Beauty,Anti-Aging Eye Cream,"Caused puffy eyes and irritation. Had to discontinue use. Not suitable for sensitive skin despite claims.",Yes
+33,2024-02-09,4,Beauty,Anti-Aging Eye Cream,"Nice eye cream, absorbs quickly without being greasy. Haven't seen dramatic results but feels luxurious.",Yes
+34,2024-02-10,5,Home,Robot Vacuum Cleaner,"Best purchase for my home! Cleans thoroughly and the app control is fantastic. My floors have never been cleaner.",Yes
+35,2024-02-11,1,Home,Robot Vacuum Cleaner,"Terrible! Gets stuck constantly and the suction is weak. Customer service refused my return request.",Yes
+36,2024-02-12,3,Home,Robot Vacuum Cleaner,"Decent vacuum for the price. Does an okay job on hard floors but struggles with carpet. Battery life could be better.",Yes
+37,2024-02-13,4,Fashion,Wool Winter Coat,"Beautiful coat! Great quality wool and keeps me warm. True to size and elegant design. Shipping was a bit slow.",Yes
+38,2024-02-14,5,Fashion,Wool Winter Coat,"Perfect winter coat! Exceptional quality and craftsmanship. The inner lining is super soft. Love it!",Yes
+39,2024-02-15,2,Fashion,Wool Winter Coat,"Color is completely different from photos - looks cheap in person. Material feels scratchy. Very misleading listing.",Yes
+40,2024-02-16,5,Electronics,Noise Cancelling Headphones,"Incredible headphones! The noise cancellation is outstanding and sound quality rivals brands costing twice as much.",Yes
+41,2024-02-17,4,Electronics,Noise Cancelling Headphones,"Great headphones overall. Comfortable for long use and good battery life. ANC could be stronger but still impressed.",Yes
+42,2024-02-18,2,Electronics,Noise Cancelling Headphones,"Bluetooth keeps disconnecting randomly. Had to return twice. Quality control seems to be an issue with this product.",Yes
+43,2024-02-19,5,Beauty,Natural Lip Balm Set,"Love these lip balms! All-natural ingredients and they actually work. Lips have never been softer. Great value for a 4-pack.",Yes
+44,2024-02-20,3,Beauty,Natural Lip Balm Set,"Nice lip balms but nothing extraordinary. Pleasant scents but effectiveness wears off quickly. Average product.",Yes
+45,2024-02-21,1,Beauty,Natural Lip Balm Set,"Two out of four arrived broken/melted. Packaging needs improvement. Very disappointing quality control.",Yes
+46,2024-02-22,4,Home,Ceramic Coffee Mug Set,"Lovely mugs! Nice design and perfect size for morning coffee. Well-packaged and arrived without any damage.",Yes
+47,2024-02-23,5,Home,Ceramic Coffee Mug Set,"Beautiful mug set! Excellent quality ceramic and dishwasher safe. Makes my morning coffee feel special.",Yes
+48,2024-02-24,2,Home,Ceramic Coffee Mug Set,"One mug had a crack and another has an uneven bottom. Quality control issues for what should be premium mugs.",Yes
+49,2024-02-25,5,Fashion,Leather Crossbody Bag,"Gorgeous bag! Real leather and beautiful craftsmanship. Gets compliments everywhere I go. Worth the investment.",Yes
+50,2024-02-26,4,Fashion,Leather Crossbody Bag,"Nice bag, good quality leather. Smaller than expected but still functional. Fast shipping and well-packaged.",Yes
+51,2024-02-27,1,Fashion,Leather Crossbody Bag,"Not real leather despite description! This is clearly synthetic. False advertising. Demanding full refund.",Yes
+52,2024-02-28,5,Electronics,Webcam HD 1080p,"Excellent webcam! Crystal clear video quality and great for work meetings. Easy plug and play setup.",Yes
+53,2024-03-01,3,Electronics,Webcam HD 1080p,"Average webcam. Video quality is decent but microphone picks up too much background noise. Needs improvement.",Yes
+54,2024-03-02,2,Electronics,Webcam HD 1080p,"Poor quality in low light conditions. Grainy video and autofocus constantly hunting. Not worth the price.",Yes
+55,2024-03-03,5,Beauty,Organic Shampoo,"Best shampoo I've used! Hair feels amazing after first wash. Love that it's organic and cruelty-free.",Yes
+56,2024-03-04,4,Beauty,Organic Shampoo,"Nice shampoo, pleasant scent and lathers well. Hair feels clean and soft. Would buy again.",Yes
+57,2024-03-05,2,Beauty,Organic Shampoo,"Made my hair very dry and tangled. Not suitable for all hair types despite claims. Disappointed.",Yes
+58,2024-03-06,5,Home,Bamboo Cutting Board Set,"Beautiful cutting boards! Sustainable bamboo and very durable. Perfect addition to my kitchen.",Yes
+59,2024-03-07,4,Home,Bamboo Cutting Board Set,"Good quality boards. Nice size variety in the set. Arrived with minor scratch but still functional.",Yes
+60,2024-03-08,3,Home,Bamboo Cutting Board Set,"Okay cutting boards. Smaller than expected based on photos. Quality is decent but nothing special.",Yes
+61,2024-03-09,5,Fashion,Yoga Pants Premium,"Most comfortable yoga pants ever! Perfect for workouts and lounging. True to size and flattering fit.",Yes
+62,2024-03-10,4,Fashion,Yoga Pants Premium,"Great yoga pants. Good quality fabric that doesn't go see-through. Squat-proof and comfortable.",Yes
+63,2024-03-11,2,Fashion,Yoga Pants Premium,"Sizing is completely off. Ordered my usual size and these are way too tight. Material feels cheap.",Yes
+64,2024-03-12,5,Electronics,LED Desk Lamp,"Perfect desk lamp! Multiple brightness levels and color temperatures. Eye-friendly and stylish design.",Yes
+65,2024-03-13,4,Electronics,LED Desk Lamp,"Good lamp overall. USB charging port is convenient. Only wish the brightness went a bit higher.",Yes
+66,2024-03-14,1,Electronics,LED Desk Lamp,"Lamp flickered from day one and died within a week. Terrible quality. Don't waste your money.",Yes
+67,2024-03-15,5,Beauty,Nail Polish Collection,"Gorgeous colors! Long-lasting formula that doesn't chip for days. My new favorite nail polish brand.",Yes
+68,2024-03-16,3,Beauty,Nail Polish Collection,"Nice colors but formula is quite thick. Needs to be applied thin or it gets goopy. Average quality.",Yes
+69,2024-03-17,2,Beauty,Nail Polish Collection,"Colors don't match the swatches shown. Very misleading. Also chips easily within 2 days.",Yes
+70,2024-03-18,5,Home,Essential Oil Diffuser,"Love this diffuser! Creates a relaxing atmosphere and runs quietly. Timer function is very convenient.",Yes
+71,2024-03-19,4,Home,Essential Oil Diffuser,"Nice diffuser, good mist output. Design looks elegant. Wish the water tank was a bit larger.",Yes
+72,2024-03-20,2,Home,Essential Oil Diffuser,"Started leaking after 2 weeks. Water got everywhere and damaged my furniture. Very disappointed.",Yes
+73,2024-03-21,5,Fashion,Silk Scarf Designer,"Absolutely stunning scarf! The silk quality is exceptional and the colors are vibrant. A true luxury item.",Yes
+74,2024-03-22,4,Fashion,Silk Scarf Designer,"Beautiful scarf, elegant and versatile. Quality is good but shipping took longer than expected.",Yes
+75,2024-03-23,3,Fashion,Silk Scarf Designer,"Nice scarf but edges are not perfectly finished. Expected better for a designer item. Still pretty though.",Yes
+76,2024-03-24,5,Electronics,Gaming Mouse RGB,"Best gaming mouse! Super responsive and the RGB lighting is amazing. Customizable buttons are perfect for gaming.",Yes
+77,2024-03-25,4,Electronics,Gaming Mouse RGB,"Great mouse for gaming. Comfortable grip and smooth glide. Software could be more intuitive though.",Yes
+78,2024-03-26,1,Electronics,Gaming Mouse RGB,"Scroll wheel broke after 3 weeks. For a gaming mouse at this price point, quality should be much better.",Yes
+79,2024-03-27,5,Beauty,Facial Cleansing Brush,"Game changer for my skincare! Face feels so clean and products absorb better. Gentle on sensitive skin.",Yes
+80,2024-03-28,4,Beauty,Facial Cleansing Brush,"Good cleansing brush. Nice variety of brush heads. Battery life is decent. Satisfied with purchase.",Yes
+81,2024-03-29,2,Beauty,Facial Cleansing Brush,"Caused skin irritation even on lowest setting. Too harsh for sensitive skin. Had to stop using.",Yes
+82,2024-03-30,5,Home,Cast Iron Skillet,"Excellent skillet! Cooks evenly and perfect sear on steaks. Already becoming my most-used pan.",Yes
+83,2024-03-31,4,Home,Cast Iron Skillet,"Great skillet, heavy but heats evenly. Came pre-seasoned which is convenient. Worth the investment.",Yes
+84,2024-04-01,3,Home,Cast Iron Skillet,"Good pan but extremely heavy. Harder to maneuver than expected. Seasoning was spotty in places.",Yes
+85,2024-04-02,5,Fashion,Cashmere Sweater,"Luxurious sweater! So soft and warm. True to size and elegant style. Perfect for fall/winter.",Yes
+86,2024-04-03,4,Fashion,Cashmere Sweater,"Beautiful sweater. Quality cashmere and cozy fit. Only downside is it sheds a little initially.",Yes
+87,2024-04-04,1,Fashion,Cashmere Sweater,"Not real cashmere! This is mostly acrylic blend. False advertising at premium price. Terrible.",Yes
+88,2024-04-05,5,Electronics,Mechanical Keyboard,"Best keyboard for typing! Cherry MX switches feel amazing. Build quality is exceptional.",Yes
+89,2024-04-06,4,Electronics,Mechanical Keyboard,"Great mechanical keyboard. Keys are responsive and satisfying. A bit loud for office use though.",Yes
+90,2024-04-07,2,Electronics,Mechanical Keyboard,"Spacebar makes annoying rattling sound. For this price, quality control should be better.",Yes
+91,2024-04-08,5,Beauty,Sunscreen SPF 50,"Best sunscreen ever! No white cast and feels lightweight. Doesn't irritate my sensitive skin.",Yes
+92,2024-04-09,4,Beauty,Sunscreen SPF 50,"Good sunscreen, absorbs quickly. Pleasant scent and doesn't break me out. Will repurchase.",Yes
+93,2024-04-10,2,Beauty,Sunscreen SPF 50,"Leaves terrible white cast on darker skin tones. Not inclusive at all. Very disappointing.",Yes
+94,2024-04-11,5,Home,Smart Thermostat,"Amazing smart home device! Easy installation and energy savings are noticeable. App works great.",Yes
+95,2024-04-12,3,Home,Smart Thermostat,"Decent thermostat. Works as expected but setup was complicated. Could use better instructions.",Yes
+96,2024-04-13,1,Home,Smart Thermostat,"WiFi constantly disconnects. Useless as a smart device if it can't stay connected. Returning it.",Yes
+97,2024-04-14,5,Fashion,Athletic Shorts,"Perfect workout shorts! Lightweight, breathable, and pockets are deep enough for phone. Love them!",Yes
+98,2024-04-15,4,Fashion,Athletic Shorts,"Great shorts for gym. Good quality and comfortable. Run slightly long but still work well.",Yes
+99,2024-04-16,3,Fashion,Athletic Shorts,"Okay shorts. Material is thinner than expected. Pockets are nice though. Decent for the price.",Yes
+100,2024-04-17,5,Electronics,USB Hub 7-Port,"Exactly what I needed! All ports work perfectly and it's compact. Great for my desk setup.",Yes
