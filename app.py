@@ -280,7 +280,6 @@ def main():
     # Header
     st.markdown('<h1 class="main-header">E-commerce Sentiment Analyzer</h1>',
                 unsafe_allow_html=True)
-    st.markdown("*Powered by the Analytics Pyramid Framework: WHAT > WHY > WHO/WHERE/WHEN*")
     st.divider()
 
     # Sidebar
