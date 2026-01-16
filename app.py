@@ -131,7 +131,7 @@ def create_sentiment_gauge(score: float, title: str = "Overall Sentiment"):
             }
         }
     ))
-    fig.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
+    fig.update_layout(height=280, margin=dict(l=20, r=20, t=60, b=20))
     return fig
 
 
@@ -270,7 +270,7 @@ def create_nps_gauge(nps_data: dict):
             ]
         }
     ))
-    fig.update_layout(height=250)
+    fig.update_layout(height=280, margin=dict(l=20, r=20, t=60, b=20))
     return fig
 
 
@@ -382,14 +382,22 @@ def main():
         negative_pct = (df_analyzed['sentiment_label'] == 'negative').sum() / total_reviews * 100
 
         with col1:
-            st.metric("Total Reviews", f"{total_reviews:,}")
+            st.metric("Total Reviews", f"{total_reviews:,}",
+                     help="Total count of reviews in the dataset. This is a simple count of all review entries processed.")
         with col2:
             st.metric("Avg Sentiment", f"{avg_sentiment:.2f}",
-                     delta=f"{'Good' if avg_sentiment > 0.3 else 'Needs Attention'}")
+                     delta=f"{'Good' if avg_sentiment > 0.3 else 'Needs Attention'}",
+                     help="Average sentiment score calculated using VADER (Valence Aware Dictionary and sEntiment Reasoner). "
+                          "Scores range from -1 (most negative) to +1 (most positive). "
+                          "Calculated as the mean of all individual review compound scores.")
         with col3:
-            st.metric("Positive Reviews", f"{positive_pct:.1f}%")
+            st.metric("Positive Reviews", f"{positive_pct:.1f}%",
+                     help="Percentage of reviews classified as positive by VADER sentiment analysis. "
+                          "A review is labeled 'positive' when its compound score is >= 0.05.")
         with col4:
-            st.metric("Negative Reviews", f"{negative_pct:.1f}%")
+            st.metric("Negative Reviews", f"{negative_pct:.1f}%",
+                     help="Percentage of reviews classified as negative by VADER sentiment analysis. "
+                          "A review is labeled 'negative' when its compound score is <= -0.05.")
 
         st.divider()
 
@@ -398,23 +406,33 @@ def main():
 
         with col1:
             st.plotly_chart(create_sentiment_gauge(avg_sentiment), use_container_width=True)
+            st.caption("📊 **VADER Sentiment Analysis**: Uses a lexicon and rule-based model optimized for social media and e-commerce text. "
+                      "Incorporates custom e-commerce terms (e.g., 'fast shipping', 'great quality').")
 
         with col2:
             nps_data = analytics_engine.calculate_nps_proxy(df_analyzed)
             st.plotly_chart(create_nps_gauge(nps_data), use_container_width=True)
+            st.caption("📊 **NPS Proxy Formula**: ((Promoters - Detractors) / Total) × 100. "
+                      "Ranges from -100 to +100. Scores >0 are favorable, >50 are excellent.")
 
         # NPS breakdown
         st.subheader("Customer Satisfaction Breakdown")
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("Promoters", f"{nps_data['promoters_pct']:.1f}%",
-                     help="Customers with sentiment >= 0.5")
+                     help="Customers classified as Promoters based on VADER sentiment analysis. "
+                          "Threshold: compound sentiment score >= 0.5. "
+                          "These customers are likely to recommend your products.")
         with col2:
             st.metric("Passives", f"{nps_data['passives_pct']:.1f}%",
-                     help="Customers with sentiment between -0.2 and 0.5")
+                     help="Customers classified as Passives based on VADER sentiment analysis. "
+                          "Threshold: compound sentiment score between -0.2 and 0.5. "
+                          "These customers are satisfied but not enthusiastic.")
         with col3:
             st.metric("Detractors", f"{nps_data['detractors_pct']:.1f}%",
-                     help="Customers with sentiment <= -0.2")
+                     help="Customers classified as Detractors based on VADER sentiment analysis. "
+                          "Threshold: compound sentiment score <= -0.2. "
+                          "These customers are unlikely to recommend and may discourage others.")
 
         # Alerts
         if date_column and date_column in df_analyzed.columns:
@@ -497,6 +515,8 @@ def main():
 
         # Word cloud
         st.subheader("Key Terms Word Cloud")
+        st.caption("📊 **Word Frequency Analysis**: Word sizes represent relative frequency in the review corpus. "
+                  "Generated using the WordCloud library with TF (Term Frequency) weighting.")
         word_freq = topic_extractor.get_word_frequencies(df_analyzed[text_column].tolist())
         if word_freq:
             fig = create_wordcloud(word_freq)
@@ -508,6 +528,8 @@ def main():
 
         with col1:
             st.subheader("Top Keywords")
+            st.caption("📊 **TF-IDF (Term Frequency-Inverse Document Frequency)**: Identifies important words by balancing "
+                      "frequency with uniqueness. Higher scores indicate more distinctive terms. Uses scikit-learn TfidfVectorizer.")
             keywords_df = pd.DataFrame(keywords[:15], columns=['Keyword', 'Score'])
             fig = px.bar(
                 keywords_df,
@@ -521,6 +543,8 @@ def main():
 
         with col2:
             st.subheader("Top Bigrams")
+            st.caption("📊 **N-gram Analysis**: Extracts common 2-word phrases using CountVectorizer. "
+                      "Helps identify recurring themes and product mentions that single words might miss.")
             bigrams = topic_extractor.get_ngrams(df_analyzed[text_column].tolist(), n=2, top_k=15)
             if bigrams:
                 bigrams_df = pd.DataFrame(bigrams, columns=['Bigram', 'Count'])
@@ -536,6 +560,8 @@ def main():
 
         # Topics
         st.subheader("Discovered Topics")
+        st.caption("📊 **NMF Topic Modeling (Non-negative Matrix Factorization)**: Automatically discovers hidden themes "
+                  "by decomposing the TF-IDF document-term matrix. Each topic is characterized by its most representative words.")
         if 'topics' in topic_results:
             topic_summary = topic_extractor.get_topic_summary()
             if not topic_summary.empty:
@@ -554,6 +580,9 @@ def main():
     with tab4:
         st.header("Aspect-Based Analysis (WHY)")
         st.markdown("*Understanding why customers feel the way they do*")
+        st.caption("📊 **Aspect-Based Sentiment Analysis (ABSA)**: Uses keyword matching with industry-specific lexicons "
+                  "to identify product aspects (e.g., quality, shipping, service). Each aspect's sentiment is calculated "
+                  "using VADER on sentences containing aspect keywords.")
 
         # Aspect sentiment chart
         if not aspect_summary.empty:
@@ -591,6 +620,9 @@ def main():
 
         # Key Driver Analysis
         st.subheader("Key Driver Analysis")
+        st.caption("📊 **Impact-Sentiment Quadrant**: Impact Score = mention_count × |avg_sentiment|. "
+                  "Aspects are prioritized into quadrants: Fix Now (high impact, negative), Maintain (high impact, positive), "
+                  "Monitor (low impact, negative), Deprioritize (low impact, positive).")
         driver_df = analytics_engine.calculate_key_drivers(df_analyzed)
 
         if not driver_df.empty:
@@ -652,20 +684,30 @@ def main():
 
                 with col1:
                     recent_sentiment = trends['avg_sentiment'].iloc[-1] if len(trends) > 0 else 0
-                    st.metric("Latest Period Sentiment", f"{recent_sentiment:.2f}")
+                    st.metric("Latest Period Sentiment", f"{recent_sentiment:.2f}",
+                             help="Average VADER compound sentiment score for the most recent time period. "
+                                  "Aggregated using pandas time-series groupby on the selected frequency (Daily/Weekly/Monthly).")
 
                 with col2:
                     if len(trends) > 1:
                         change = trends['wow_change'].iloc[-1]
                         st.metric("Period-over-Period Change", f"{change:.3f}",
-                                 delta=f"{'Up' if change > 0 else 'Down'}")
+                                 delta=f"{'Up' if change > 0 else 'Down'}",
+                                 help="Change in average sentiment compared to the previous period. "
+                                      "Calculated as: current_period_avg - previous_period_avg. "
+                                      "Uses pandas diff() for period-over-period comparison.")
 
                 with col3:
                     avg_volume = trends['review_count'].mean()
-                    st.metric("Avg Reviews per Period", f"{avg_volume:.0f}")
+                    st.metric("Avg Reviews per Period", f"{avg_volume:.0f}",
+                             help="Average number of reviews received per time period. "
+                                  "Calculated using pandas groupby count aggregation across all periods.")
 
                 # Anomaly detection
                 st.subheader("Anomaly Detection")
+                st.caption("📊 **Z-Score Statistical Method**: Identifies periods where sentiment deviates significantly from the mean. "
+                          "Threshold: |z-score| > 2.0 (approximately 2 standard deviations). "
+                          "Positive spikes indicate unusually positive periods; negative spikes indicate sentiment drops.")
                 anomalies = analytics_engine.detect_sentiment_anomalies(
                     df_analyzed, date_column
                 )
