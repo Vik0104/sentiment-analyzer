@@ -176,8 +176,8 @@ class SupabaseClient:
     async def update_subscription(
         self,
         user_id: str,
-        stripe_customer_id: Optional[str] = None,
-        stripe_subscription_id: Optional[str] = None,
+        razorpay_customer_id: Optional[str] = None,
+        razorpay_subscription_id: Optional[str] = None,
         plan_tier: Optional[str] = None,
         status: Optional[str] = None,
         billing_period_start: Optional[datetime] = None,
@@ -188,8 +188,8 @@ class SupabaseClient:
 
         Args:
             user_id: User UUID
-            stripe_customer_id: Stripe customer ID
-            stripe_subscription_id: Stripe subscription ID
+            razorpay_customer_id: Razorpay customer ID
+            razorpay_subscription_id: Razorpay subscription ID
             plan_tier: New plan tier
             status: Subscription status
             billing_period_start: Billing period start
@@ -200,10 +200,10 @@ class SupabaseClient:
         """
         update_data = {}
 
-        if stripe_customer_id is not None:
-            update_data['stripe_customer_id'] = stripe_customer_id
-        if stripe_subscription_id is not None:
-            update_data['stripe_subscription_id'] = stripe_subscription_id
+        if razorpay_customer_id is not None:
+            update_data['razorpay_customer_id'] = razorpay_customer_id
+        if razorpay_subscription_id is not None:
+            update_data['razorpay_subscription_id'] = razorpay_subscription_id
         if plan_tier is not None:
             update_data['plan_tier'] = plan_tier
             update_data['reviews_limit'] = (

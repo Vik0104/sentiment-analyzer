@@ -14,7 +14,10 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(npm run build:*)",
       "Bash(git pull:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(.venvScriptsActivate.ps1)",
+      "Bash(c:/Users/lavan/Desktop/sentiment-analyzer/venv/Scripts/python.exe:*)",
+      "Bash(c:/Users/lavan/Desktop/sentiment-analyzer/venv/Scripts/pip.exe install:*)"
     ]
   }
 }

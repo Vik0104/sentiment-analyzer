@@ -34,11 +34,12 @@ class Settings(BaseSettings):
     supabase_url: str = Field(..., description="Supabase project URL")
     supabase_key: str = Field(..., description="Supabase anon/service key")
 
-    # Stripe
-    stripe_secret_key: str = Field(..., description="Stripe secret key")
-    stripe_webhook_secret: str = Field(..., description="Stripe webhook signing secret")
-    stripe_price_starter: str = Field(default="", description="Stripe Price ID for Starter plan")
-    stripe_price_pro: str = Field(default="", description="Stripe Price ID for Pro plan")
+    # Razorpay
+    razorpay_key_id: str = Field(..., description="Razorpay API Key ID")
+    razorpay_key_secret: str = Field(..., description="Razorpay API Key Secret")
+    razorpay_webhook_secret: str = Field(..., description="Razorpay webhook signing secret")
+    razorpay_plan_starter: str = Field(default="", description="Razorpay Plan ID for Starter plan")
+    razorpay_plan_pro: str = Field(default="", description="Razorpay Plan ID for Pro plan")
 
     # Redis (optional, for caching)
     redis_url: Optional[str] = None

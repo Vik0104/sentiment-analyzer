@@ -1,19 +1,17 @@
 """
-Billing routes for Stripe subscription management.
+Billing routes for Razorpay subscription management.
 """
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
 from app.core.dependencies import get_current_user
 from app.core.config import get_settings
-from app.services.stripe_service import stripe_service
+from app.services.razorpay_service import razorpay_service
 from app.db.supabase import get_db
 from app.api.v1.schemas.billing import (
     SubscriptionStatus,
     CheckoutRequest,
     CheckoutResponse,
-    PortalRequest,
-    PortalResponse,
     PlansResponse,
     PlanInfo
 )
@@ -51,13 +49,15 @@ async def get_subscription_status(current_user: dict = Depends(get_current_user)
     )
 
 
-@router.post("/checkout", response_model=CheckoutResponse)
+@router.post("/checkout")
 async def create_checkout_session(
     request: CheckoutRequest,
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Create a Stripe Checkout session for subscription upgrade.
+    Create a Razorpay subscription for upgrade.
+    Returns a checkout URL that redirects to Razorpay's hosted checkout page.
+    Also returns subscription_id for verification after payment.
     """
     db = get_db()
     user_id = current_user['sub']
@@ -69,16 +69,31 @@ async def create_checkout_session(
             detail="User not found"
         )
 
+    # Get existing Razorpay customer ID if available
+    subscription = await db.get_subscription(user_id)
+    existing_customer_id = subscription.get('razorpay_customer_id') if subscription else None
+
     try:
-        checkout_url = await stripe_service.create_checkout_session(
+        result = await razorpay_service.create_subscription(
             user_id=user_id,
             user_email=user.get('email', ''),
             plan=request.plan,
-            success_url=request.success_url,
-            cancel_url=request.cancel_url
+            customer_id=existing_customer_id
         )
 
-        return CheckoutResponse(checkout_url=checkout_url)
+        # Store pending subscription ID in database for verification later
+        await db.update_subscription(
+            user_id=user_id,
+            razorpay_subscription_id=result['subscription_id'],
+            razorpay_customer_id=result['customer_id'],
+            status='pending'
+        )
+
+        # Return checkout URL and subscription_id for verification
+        return {
+            "checkout_url": result['short_url'],
+            "subscription_id": result['subscription_id']
+        }
 
     except ValueError as e:
         raise HTTPException(
@@ -88,40 +103,7 @@ async def create_checkout_session(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create checkout session: {str(e)}"
-        )
-
-
-@router.post("/portal", response_model=PortalResponse)
-async def create_portal_session(
-    request: PortalRequest,
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Create a Stripe Customer Portal session for subscription management.
-    """
-    db = get_db()
-    user_id = current_user['sub']
-
-    subscription = await db.get_subscription(user_id)
-    if not subscription or not subscription.get('stripe_customer_id'):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No Stripe customer found. Please subscribe first."
-        )
-
-    try:
-        portal_url = await stripe_service.create_customer_portal_session(
-            customer_id=subscription['stripe_customer_id'],
-            return_url=request.return_url
-        )
-
-        return PortalResponse(portal_url=portal_url)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create portal session: {str(e)}"
+            detail=f"Failed to create subscription: {str(e)}"
         )
 
 
@@ -180,43 +162,233 @@ async def get_available_plans():
 
 @router.post("/cancel")
 async def cancel_subscription(
-    at_period_end: bool = True,
+    at_cycle_end: bool = True,
     current_user: dict = Depends(get_current_user)
 ):
     """
     Cancel current subscription.
 
-    By default, cancels at the end of the billing period.
+    By default, cancels at the end of the billing cycle.
     """
     db = get_db()
     user_id = current_user['sub']
 
     subscription = await db.get_subscription(user_id)
-    if not subscription or not subscription.get('stripe_subscription_id'):
+    if not subscription or not subscription.get('razorpay_subscription_id'):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No active subscription found"
         )
 
     try:
-        result = await stripe_service.cancel_subscription(
-            subscription_id=subscription['stripe_subscription_id'],
-            at_period_end=at_period_end
+        result = await razorpay_service.cancel_subscription(
+            subscription_id=subscription['razorpay_subscription_id'],
+            at_cycle_end=at_cycle_end
         )
 
         # Update database
         await db.update_subscription(
             user_id=user_id,
-            status='cancelling' if at_period_end else 'cancelled'
+            status='cancelling' if at_cycle_end else 'cancelled'
         )
 
         return {
             "message": "Subscription cancelled",
-            "cancel_at_period_end": result.get('cancel_at_period_end', True)
+            "cancel_at_cycle_end": result.get('cancel_at_cycle_end', True)
         }
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cancel subscription: {str(e)}"
+        )
+
+
+@router.post("/pause")
+async def pause_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Pause current subscription.
+
+    Razorpay allows pausing subscriptions, which can be resumed later.
+    """
+    db = get_db()
+    user_id = current_user['sub']
+
+    subscription = await db.get_subscription(user_id)
+    if not subscription or not subscription.get('razorpay_subscription_id'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No active subscription found"
+        )
+
+    if subscription.get('status') != 'active':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Can only pause active subscriptions"
+        )
+
+    try:
+        await razorpay_service.pause_subscription(
+            subscription_id=subscription['razorpay_subscription_id']
+        )
+
+        await db.update_subscription(
+            user_id=user_id,
+            status='paused'
+        )
+
+        return {"message": "Subscription paused"}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to pause subscription: {str(e)}"
+        )
+
+
+@router.post("/resume")
+async def resume_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Resume a paused subscription.
+    """
+    db = get_db()
+    user_id = current_user['sub']
+
+    subscription = await db.get_subscription(user_id)
+    if not subscription or not subscription.get('razorpay_subscription_id'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No subscription found"
+        )
+
+    if subscription.get('status') != 'paused':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Can only resume paused subscriptions"
+        )
+
+    try:
+        await razorpay_service.resume_subscription(
+            subscription_id=subscription['razorpay_subscription_id']
+        )
+
+        await db.update_subscription(
+            user_id=user_id,
+            status='active'
+        )
+
+        return {"message": "Subscription resumed"}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to resume subscription: {str(e)}"
+        )
+
+
+@router.post("/verify")
+async def verify_subscription(
+    subscription_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Verify subscription status directly with Razorpay (no webhook needed).
+    Called after user returns from Razorpay checkout.
+    """
+    db = get_db()
+    user_id = current_user['sub']
+
+    try:
+        # Fetch subscription status from Razorpay
+        razorpay_sub = await razorpay_service.get_subscription(subscription_id)
+
+        if razorpay_sub['status'] in ['active', 'authenticated']:
+            # Subscription is active, update database
+            plan = razorpay_sub.get('plan', 'starter')
+            reviews_limit = razorpay_service.get_reviews_limit(plan)
+
+            await db.update_subscription(
+                user_id=user_id,
+                plan_tier=plan,
+                status='active',
+                razorpay_subscription_id=subscription_id,
+                razorpay_customer_id=razorpay_sub.get('customer_id'),
+                reviews_limit=reviews_limit,
+                billing_period_start=razorpay_sub.get('current_start'),
+                billing_period_end=razorpay_sub.get('current_end')
+            )
+
+            return {
+                "success": True,
+                "message": "Subscription activated successfully",
+                "plan": plan,
+                "status": "active"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Subscription status: {razorpay_sub['status']}",
+                "status": razorpay_sub['status']
+            }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify subscription: {str(e)}"
+        )
+
+
+@router.get("/sync")
+async def sync_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Sync subscription status with Razorpay.
+    Use this to refresh subscription status from Razorpay.
+    """
+    db = get_db()
+    user_id = current_user['sub']
+
+    subscription = await db.get_subscription(user_id)
+    if not subscription or not subscription.get('razorpay_subscription_id'):
+        return {"message": "No Razorpay subscription to sync", "synced": False}
+
+    try:
+        # Fetch latest status from Razorpay
+        razorpay_sub = await razorpay_service.get_subscription(
+            subscription['razorpay_subscription_id']
+        )
+
+        # Map Razorpay status to our status
+        status_map = {
+            'created': 'pending',
+            'authenticated': 'active',
+            'active': 'active',
+            'pending': 'payment_failed',
+            'halted': 'halted',
+            'cancelled': 'cancelled',
+            'completed': 'cancelled',
+            'expired': 'cancelled',
+            'paused': 'paused'
+        }
+
+        new_status = status_map.get(razorpay_sub['status'], 'active')
+        plan = razorpay_sub.get('plan', subscription.get('plan_tier', 'free'))
+
+        await db.update_subscription(
+            user_id=user_id,
+            status=new_status,
+            billing_period_start=razorpay_sub.get('current_start'),
+            billing_period_end=razorpay_sub.get('current_end')
+        )
+
+        return {
+            "message": "Subscription synced",
+            "synced": True,
+            "status": new_status,
+            "plan": plan
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to sync subscription: {str(e)}"
         )

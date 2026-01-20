@@ -59,8 +59,8 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async getAuthorizationUrl(): Promise<{ authorization_url: string; state: string }> {
-    return this.request('/auth/judgeme/authorize');
+  async getAuthorizationUrl(shopDomain: string): Promise<{ authorization_url: string; state: string }> {
+    return this.request(`/auth/judgeme/authorize?shop_domain=${encodeURIComponent(shopDomain)}`);
   }
 
   async handleCallback(code: string, state: string): Promise<LoginResponse> {
@@ -134,9 +134,9 @@ class ApiClient {
 
   async createCheckoutSession(
     plan: 'starter' | 'pro',
-    successUrl: string,
-    cancelUrl: string
-  ): Promise<{ checkout_url: string }> {
+    successUrl?: string,
+    cancelUrl?: string
+  ): Promise<{ checkout_url: string; subscription_id: string }> {
     return this.request('/api/v1/billing/checkout', {
       method: 'POST',
       body: JSON.stringify({
@@ -147,21 +147,67 @@ class ApiClient {
     });
   }
 
-  async createPortalSession(returnUrl: string): Promise<{ portal_url: string }> {
-    return this.request('/api/v1/billing/portal', {
+  async verifySubscription(subscriptionId: string): Promise<{
+    success: boolean;
+    message: string;
+    plan?: string;
+    status: string;
+  }> {
+    return this.request(`/api/v1/billing/verify?subscription_id=${encodeURIComponent(subscriptionId)}`, {
       method: 'POST',
-      body: JSON.stringify({ return_url: returnUrl }),
     });
+  }
+
+  async syncSubscription(): Promise<{
+    message: string;
+    synced: boolean;
+    status?: string;
+    plan?: string;
+  }> {
+    return this.request('/api/v1/billing/sync');
   }
 
   async getPlans(): Promise<PlansResponse> {
     return this.request('/api/v1/billing/plans');
   }
 
-  async cancelSubscription(atPeriodEnd: boolean = true): Promise<{ message: string }> {
-    return this.request(`/api/v1/billing/cancel?at_period_end=${atPeriodEnd}`, {
+  async cancelSubscription(atCycleEnd: boolean = true): Promise<{ message: string }> {
+    return this.request(`/api/v1/billing/cancel?at_cycle_end=${atCycleEnd}`, {
       method: 'POST',
     });
+  }
+
+  async pauseSubscription(): Promise<{ message: string }> {
+    return this.request('/api/v1/billing/pause', {
+      method: 'POST',
+    });
+  }
+
+  async resumeSubscription(): Promise<{ message: string }> {
+    return this.request('/api/v1/billing/resume', {
+      method: 'POST',
+    });
+  }
+
+  // Demo endpoints (no auth required)
+  async getDemoDashboard(): Promise<DashboardResponse> {
+    return this.request('/api/v1/demo/dashboard');
+  }
+
+  async getDemoSentiment(): Promise<SentimentResponse> {
+    return this.request('/api/v1/demo/sentiment');
+  }
+
+  async getDemoTopics(): Promise<TopicsResponse> {
+    return this.request('/api/v1/demo/topics');
+  }
+
+  async getDemoAspects(): Promise<AspectResponse> {
+    return this.request('/api/v1/demo/aspects');
+  }
+
+  async getDemoTrends(): Promise<TrendsResponse> {
+    return this.request('/api/v1/demo/trends');
   }
 }
 

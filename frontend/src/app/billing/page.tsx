@@ -28,9 +28,10 @@ import {
   Crown,
   Zap,
   Star,
-  ExternalLink,
   AlertCircle,
   CheckCircle,
+  Pause,
+  Play,
 } from 'lucide-react';
 import { Suspense } from 'react';
 
@@ -62,18 +63,45 @@ function BillingContent() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  // Handle success/cancel from Stripe
+  // Handle success/cancel from Razorpay
   useEffect(() => {
     const success = searchParams.get('success');
     const cancelled = searchParams.get('cancelled');
 
+    const verifyPayment = async () => {
+      const pendingSubId = localStorage.getItem('pending_subscription_id');
+      if (pendingSubId) {
+        try {
+          // Verify subscription with backend (no webhook needed)
+          const result = await api.verifySubscription(pendingSubId);
+          if (result.success) {
+            setShowSuccess(true);
+            refreshUser();
+            refetchSub();
+          }
+        } catch (error) {
+          console.error('Failed to verify subscription:', error);
+          // Try syncing as fallback
+          await api.syncSubscription();
+          refreshUser();
+          refetchSub();
+        } finally {
+          localStorage.removeItem('pending_subscription_id');
+        }
+      } else {
+        // No pending subscription, just sync
+        await api.syncSubscription();
+        refreshUser();
+        refetchSub();
+        setShowSuccess(true);
+      }
+    };
+
     if (success === 'true') {
-      setShowSuccess(true);
-      refreshUser();
-      refetchSub();
-      // Clear the URL params
+      verifyPayment();
       router.replace('/billing');
     } else if (cancelled === 'true') {
+      localStorage.removeItem('pending_subscription_id');
       setShowCancelled(true);
       router.replace('/billing');
     }
@@ -82,24 +110,17 @@ function BillingContent() {
   const handleUpgrade = async (plan: 'starter' | 'pro') => {
     setIsProcessing(true);
     try {
-      const { checkout_url } = await api.createCheckoutSession(
+      const { checkout_url, subscription_id } = await api.createCheckoutSession(
         plan,
         `${window.location.origin}/billing?success=true`,
         `${window.location.origin}/billing?cancelled=true`
       );
+      // Store subscription_id for verification after return
+      localStorage.setItem('pending_subscription_id', subscription_id);
       window.location.href = checkout_url;
     } catch (error) {
       console.error('Failed to create checkout session:', error);
       setIsProcessing(false);
-    }
-  };
-
-  const handleManageBilling = async () => {
-    try {
-      const { portal_url } = await api.createPortalSession(window.location.href);
-      window.location.href = portal_url;
-    } catch (error) {
-      console.error('Failed to open billing portal:', error);
     }
   };
 
@@ -110,6 +131,26 @@ function BillingContent() {
       refreshUser();
     } catch (error) {
       console.error('Failed to cancel subscription:', error);
+    }
+  };
+
+  const handlePauseSubscription = async () => {
+    try {
+      await api.pauseSubscription();
+      refetchSub();
+      refreshUser();
+    } catch (error) {
+      console.error('Failed to pause subscription:', error);
+    }
+  };
+
+  const handleResumeSubscription = async () => {
+    try {
+      await api.resumeSubscription();
+      refetchSub();
+      refreshUser();
+    } catch (error) {
+      console.error('Failed to resume subscription:', error);
     }
   };
 
@@ -224,13 +265,47 @@ function BillingContent() {
                 </AlertDescription>
               </Alert>
             )}
+            {subscription?.status === 'paused' && (
+              <Alert>
+                <Pause className="h-4 w-4" />
+                <AlertTitle>Subscription Paused</AlertTitle>
+                <AlertDescription>
+                  Your subscription is currently paused. Resume to continue using premium features.
+                </AlertDescription>
+              </Alert>
+            )}
+            {subscription?.status === 'halted' && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Subscription Halted</AlertTitle>
+                <AlertDescription>
+                  Your subscription has been halted due to payment failures. Please update your payment method.
+                </AlertDescription>
+              </Alert>
+            )}
+            {subscription?.status === 'payment_failed' && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Payment Failed</AlertTitle>
+                <AlertDescription>
+                  Your recent payment failed. Please update your payment method to continue service.
+                </AlertDescription>
+              </Alert>
+            )}
             {user.subscription_tier !== 'free' && (
-              <div className="flex gap-3 pt-2">
-                <Button variant="outline" onClick={handleManageBilling}>
-                  Manage Billing
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
-                {!subscription?.cancel_at_period_end && (
+              <div className="flex gap-3 pt-2 flex-wrap">
+                {subscription?.status === 'paused' ? (
+                  <Button variant="outline" onClick={handleResumeSubscription}>
+                    <Play className="mr-2 h-4 w-4" />
+                    Resume Subscription
+                  </Button>
+                ) : subscription?.status === 'active' && (
+                  <Button variant="outline" onClick={handlePauseSubscription}>
+                    <Pause className="mr-2 h-4 w-4" />
+                    Pause Subscription
+                  </Button>
+                )}
+                {!subscription?.cancel_at_period_end && subscription?.status !== 'paused' && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="ghost" className="text-destructive">
@@ -266,7 +341,6 @@ function BillingContent() {
             const TierIcon = tierIcons[plan.tier];
             const isCurrentPlan = user.subscription_tier === plan.tier;
             const canUpgrade = index > currentTierIndex;
-            const canDowngrade = index < currentTierIndex;
 
             return (
               <Card
@@ -292,9 +366,14 @@ function BillingContent() {
                     <CardTitle>{plan.name}</CardTitle>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">${plan.price_monthly}</span>
+                    <span className="text-4xl font-bold">
+                      {plan.tier === 'free' ? '₹0' : plan.tier === 'starter' ? '₹1,499' : '₹3,999'}
+                    </span>
                     <span className="text-muted-foreground">/month</span>
                   </div>
+                  {plan.tier !== 'free' && (
+                    <p className="text-xs text-muted-foreground">(${plan.price_monthly} USD)</p>
+                  )}
                   <CardDescription>
                     Up to {plan.reviews_limit.toLocaleString()} reviews/month
                   </CardDescription>
@@ -319,14 +398,6 @@ function BillingContent() {
                       disabled={isProcessing}
                     >
                       {isProcessing ? 'Processing...' : `Upgrade to ${plan.name}`}
-                    </Button>
-                  ) : canDowngrade ? (
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      onClick={handleManageBilling}
-                    >
-                      Downgrade via Portal
                     </Button>
                   ) : (
                     <Button className="w-full" variant="outline" disabled>
@@ -355,15 +426,22 @@ function BillingContent() {
             <div>
               <h4 className="font-medium mb-1">Can I change plans at any time?</h4>
               <p className="text-sm text-muted-foreground">
-                Yes! Upgrades take effect immediately with prorated billing. Downgrades take effect
+                Yes! Upgrades take effect immediately. Downgrades and cancellations take effect
                 at the end of your current billing period.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-1">Can I pause my subscription?</h4>
+              <p className="text-sm text-muted-foreground">
+                Yes! You can pause your subscription at any time and resume it later. During the
+                pause period, you won&apos;t be charged.
               </p>
             </div>
             <div>
               <h4 className="font-medium mb-1">What payment methods do you accept?</h4>
               <p className="text-sm text-muted-foreground">
-                We accept all major credit cards through Stripe, including Visa, Mastercard,
-                American Express, and Discover.
+                We accept all major payment methods through Razorpay, including credit/debit cards,
+                UPI, net banking, and popular wallets like PayTM, PhonePe, and Google Pay.
               </p>
             </div>
             <div>

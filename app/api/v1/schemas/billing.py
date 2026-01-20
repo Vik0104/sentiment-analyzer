@@ -20,25 +20,15 @@ class SubscriptionStatus(BaseModel):
 
 
 class CheckoutRequest(BaseModel):
-    """Request to create checkout session."""
+    """Request to create Razorpay subscription checkout."""
     plan: str = Field(..., pattern='^(starter|pro)$')
-    success_url: str
-    cancel_url: str
+    success_url: Optional[str] = None
+    cancel_url: Optional[str] = None
 
 
 class CheckoutResponse(BaseModel):
-    """Checkout session response."""
+    """Razorpay checkout response with hosted payment page URL."""
     checkout_url: str
-
-
-class PortalRequest(BaseModel):
-    """Request to create customer portal session."""
-    return_url: str
-
-
-class PortalResponse(BaseModel):
-    """Customer portal session response."""
-    portal_url: str
 
 
 class PlanInfo(BaseModel):

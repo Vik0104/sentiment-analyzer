@@ -10,8 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.services.analysis import init_analysis_service
-from app.api.v1.routes import auth, analysis, billing
-from app.api.webhooks import stripe as stripe_webhooks
+from app.api.v1.routes import auth, analysis, billing, demo
+from app.api.webhooks import razorpay as razorpay_webhooks
 
 settings = get_settings()
 
@@ -87,9 +87,15 @@ app.include_router(
 )
 
 app.include_router(
-    stripe_webhooks.router,
+    razorpay_webhooks.router,
     prefix="/webhooks",
     tags=["Webhooks"]
+)
+
+app.include_router(
+    demo.router,
+    prefix="/api/v1/demo",
+    tags=["Demo"]
 )
 
 

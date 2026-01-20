@@ -162,7 +162,7 @@ export interface TrendsResponse {
 
 export interface SubscriptionStatus {
   plan_tier: 'free' | 'starter' | 'pro';
-  status: string;
+  status: 'active' | 'cancelled' | 'cancelling' | 'paused' | 'halted' | 'payment_failed';
   reviews_limit: number;
   reviews_used: number;
   reviews_remaining: number;

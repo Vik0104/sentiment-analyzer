@@ -1,12 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   BarChart3,
   TrendingUp,
@@ -21,6 +29,10 @@ import {
 export default function LandingPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const [showConnectDialog, setShowConnectDialog] = useState(false);
+  const [shopDomain, setShopDomain] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -28,12 +40,38 @@ export default function LandingPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const handleConnectJudgeMe = async () => {
+  const handleConnectJudgeMe = () => {
+    setShowConnectDialog(true);
+    setConnectError(null);
+  };
+
+  const handleSubmitShopDomain = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Normalize shop domain
+    let normalizedDomain = shopDomain.trim().toLowerCase();
+
+    // Remove protocol if present
+    normalizedDomain = normalizedDomain.replace(/^https?:\/\//, '');
+
+    // Remove trailing slash
+    normalizedDomain = normalizedDomain.replace(/\/$/, '');
+
+    if (!normalizedDomain) {
+      setConnectError('Please enter your shop domain');
+      return;
+    }
+
+    setIsConnecting(true);
+    setConnectError(null);
+
     try {
-      const { authorization_url } = await api.getAuthorizationUrl();
+      const { authorization_url } = await api.getAuthorizationUrl(normalizedDomain);
       window.location.href = authorization_url;
     } catch (error) {
       console.error('Failed to get authorization URL:', error);
+      setConnectError('Failed to connect. Please check your shop domain and try again.');
+      setIsConnecting(false);
     }
   };
 
@@ -71,7 +109,9 @@ export default function LandingPage() {
   const plans = [
     {
       name: 'Free',
-      price: '$0',
+      price: '₹0',
+      priceUSD: '$0',
+      tier: 'free' as const,
       description: 'Get started with basic analysis',
       features: ['Up to 100 reviews/month', 'Basic sentiment analysis', 'NPS proxy score', '7-day analysis history'],
       cta: 'Get Started',
@@ -79,7 +119,9 @@ export default function LandingPage() {
     },
     {
       name: 'Starter',
-      price: '$19',
+      price: '₹1,499',
+      priceUSD: '$19',
+      tier: 'starter' as const,
       description: 'Perfect for growing stores',
       features: [
         'Up to 1,000 reviews/month',
@@ -88,12 +130,14 @@ export default function LandingPage() {
         'Trend analysis',
         '30-day history',
       ],
-      cta: 'Start Free Trial',
+      cta: 'Subscribe Now',
       highlighted: true,
     },
     {
       name: 'Pro',
-      price: '$49',
+      price: '₹3,999',
+      priceUSD: '$49',
+      tier: 'pro' as const,
       description: 'For high-volume sellers',
       features: [
         'Up to 10,000 reviews/month',
@@ -102,10 +146,19 @@ export default function LandingPage() {
         'Priority processing',
         'Unlimited history',
       ],
-      cta: 'Start Free Trial',
+      cta: 'Subscribe Now',
       highlighted: false,
     },
   ];
+
+  const handlePlanSelect = (tier: 'free' | 'starter' | 'pro') => {
+    if (tier === 'free') {
+      handleConnectJudgeMe();
+    } else {
+      // For paid plans, user needs to connect first, then upgrade from dashboard
+      handleConnectJudgeMe();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -142,7 +195,7 @@ export default function LandingPage() {
             Connect Your Store
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button size="lg" variant="outline">
+          <Button size="lg" variant="outline" onClick={() => router.push('/demo')}>
             View Demo
           </Button>
         </div>
@@ -173,10 +226,10 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section id="pricing" className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-muted-foreground">Start free, upgrade when you need more.</p>
+          <p className="text-muted-foreground">Start free, upgrade when you need more. Powered by Razorpay.</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan) => (
@@ -193,6 +246,9 @@ export default function LandingPage() {
                   <span className="text-4xl font-bold">{plan.price}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
+                {plan.tier !== 'free' && (
+                  <p className="text-xs text-muted-foreground">({plan.priceUSD} USD)</p>
+                )}
                 <CardDescription>{plan.description}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -207,7 +263,7 @@ export default function LandingPage() {
                 <Button
                   className="w-full"
                   variant={plan.highlighted ? 'default' : 'outline'}
-                  onClick={handleConnectJudgeMe}
+                  onClick={() => handlePlanSelect(plan.tier)}
                 >
                   {plan.cta}
                 </Button>
@@ -248,6 +304,46 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Connect Shop Dialog */}
+      <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect Your Store</DialogTitle>
+            <DialogDescription>
+              Enter your Shopify store domain to connect with Judge.me
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitShopDomain} className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                placeholder="yourstore.myshopify.com"
+                value={shopDomain}
+                onChange={(e) => setShopDomain(e.target.value)}
+                disabled={isConnecting}
+              />
+              {connectError && (
+                <p className="text-sm text-destructive">{connectError}</p>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowConnectDialog(false)}
+                disabled={isConnecting}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isConnecting} className="flex-1">
+                {isConnecting ? 'Connecting...' : 'Connect'}
+                {!isConnecting && <ArrowRight className="ml-2 h-4 w-4" />}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

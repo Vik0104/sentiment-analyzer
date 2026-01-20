@@ -2,11 +2,15 @@
 Authentication routes for Judge.me OAuth.
 """
 
-from fastapi import APIRouter, HTTPException, status, Depends, Response
+import json
+import base64
+import httpx
+from fastapi import APIRouter, HTTPException, status, Depends, Response, Query
 from fastapi.responses import RedirectResponse
+from typing import Optional
 
 from app.core.config import get_settings
-from app.core.security import create_access_token
+from app.core.security import create_access_token, generate_state_token
 from app.core.dependencies import get_current_user
 from app.services.judgeme import judgeme_service
 from app.db.supabase import get_db
@@ -20,20 +24,25 @@ router = APIRouter()
 settings = get_settings()
 
 # In-memory state storage (use Redis in production)
-_oauth_states: dict[str, bool] = {}
+# Now stores shop_domain along with validity
+_oauth_states: dict[str, dict] = {}
 
 
 @router.get("/judgeme/authorize", response_model=AuthorizationURLResponse)
-async def get_authorization_url():
+async def get_authorization_url(shop_domain: str = Query(..., description="Shop domain (e.g., yourstore.myshopify.com)")):
     """
     Get Judge.me OAuth authorization URL.
 
     Returns the URL to redirect users to for OAuth authorization.
+    The shop_domain is stored with the state token and retrieved during callback.
     """
     auth_url, state = judgeme_service.get_authorization_url()
 
-    # Store state for validation
-    _oauth_states[state] = True
+    # Store state with shop_domain for validation and retrieval
+    _oauth_states[state] = {
+        "valid": True,
+        "shop_domain": shop_domain
+    }
 
     return AuthorizationURLResponse(
         authorization_url=auth_url,
@@ -48,43 +57,40 @@ async def oauth_callback(code: str, state: str):
 
     Exchanges authorization code for access token and creates/updates user.
     """
-    # Validate state
+    # Validate state and get stored data
     if state not in _oauth_states:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired state token"
         )
 
+    # Get stored state data (includes shop_domain)
+    state_data = _oauth_states[state]
+    shop_domain = state_data.get("shop_domain")
+
     # Remove used state
     del _oauth_states[state]
+
+    if not shop_domain:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Shop domain not found in state. Please try connecting again."
+        )
 
     try:
         # Exchange code for token
         token_response = await judgeme_service.exchange_code_for_token(code, state)
         access_token = token_response.get('access_token')
 
+        # Debug: log token response structure
+        print(f"Token response keys: {list(token_response.keys())}")
+        print(f"Using shop_domain from state: {shop_domain}")
+
         if not access_token:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Failed to obtain access token"
             )
-
-        # Get shop info from Judge.me
-        # Note: This requires knowing the shop domain, which should come from the OAuth scope
-        # For now, we'll extract it from the token response if available
-        shop_domain = token_response.get('shop_domain', '')
-
-        if not shop_domain:
-            # Try to get shop info using the token
-            try:
-                # This is a placeholder - actual implementation depends on Judge.me API
-                shop_info = await judgeme_service.get_shop_info(access_token, '')
-                shop_domain = shop_info.get('domain', '')
-            except Exception:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Could not determine shop domain"
-                )
 
         db = get_db()
 
