@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # Redis (optional, for caching)
     redis_url: Optional[str] = None
 
+    # Anthropic Claude API (optional, for AI chat)
+    anthropic_api_key: Optional[str] = None
+
     # CORS
     cors_origins: list[str] = ["http://localhost:3000", "https://localhost:3000"]
 

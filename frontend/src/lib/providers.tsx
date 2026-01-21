@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AuthProvider } from './auth-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from 'sonner';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -24,6 +25,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <TooltipProvider>
           {children}
+          <Toaster position="bottom-right" richColors />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

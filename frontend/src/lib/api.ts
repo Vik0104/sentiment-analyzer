@@ -189,6 +189,13 @@ class ApiClient {
     });
   }
 
+  async createPortalSession(returnUrl: string): Promise<{ portal_url: string }> {
+    return this.request('/api/v1/billing/portal', {
+      method: 'POST',
+      body: JSON.stringify({ return_url: returnUrl }),
+    });
+  }
+
   // Demo endpoints (no auth required)
   async getDemoDashboard(): Promise<DashboardResponse> {
     return this.request('/api/v1/demo/dashboard');
@@ -208,6 +215,14 @@ class ApiClient {
 
   async getDemoTrends(): Promise<TrendsResponse> {
     return this.request('/api/v1/demo/trends');
+  }
+
+  // Chat endpoint for Claude AI integration
+  async chat(message: string, context: string): Promise<{ response: string }> {
+    return this.request('/api/v1/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, context }),
+    });
   }
 }
 

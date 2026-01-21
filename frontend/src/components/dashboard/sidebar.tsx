@@ -28,6 +28,9 @@ import {
   LogOut,
   ChevronDown,
   Store,
+  TreeDeciduous,
+  Globe2,
+  MessageCircle,
 } from 'lucide-react';
 
 const navigation = [
@@ -36,6 +39,12 @@ const navigation = [
   { name: 'Topics', href: '/dashboard/topics', icon: MessageSquareText, tier: 'starter' },
   { name: 'Aspects', href: '/dashboard/aspects', icon: Target, tier: 'starter' },
   { name: 'Trends', href: '/dashboard/trends', icon: TrendingUp, tier: 'starter' },
+];
+
+const advancedNavigation = [
+  { name: 'Perception Tree', href: '/dashboard/perception-tree', icon: TreeDeciduous, tier: 'starter', isNew: true },
+  { name: 'Sentiment Map', href: '/dashboard/sentiment-map', icon: Globe2, tier: 'starter', isNew: true },
+  { name: 'AI Insights', href: '/dashboard/chat', icon: MessageCircle, tier: 'starter', isNew: true },
 ];
 
 const tierColors = {
@@ -104,7 +113,10 @@ export function DashboardSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          Analytics
+        </p>
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           const hasAccess = canAccess(item.tier);
@@ -124,6 +136,44 @@ export function DashboardSidebar() {
             >
               <item.icon className="h-4 w-4" />
               {item.name}
+              {item.tier && !hasAccess && (
+                <Badge variant="outline" className="ml-auto text-xs">
+                  {item.tier}
+                </Badge>
+              )}
+            </Link>
+          );
+        })}
+
+        <Separator className="my-4" />
+
+        <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          Advanced
+        </p>
+        {advancedNavigation.map((item) => {
+          const isActive = pathname === item.href;
+          const hasAccess = canAccess(item.tier);
+
+          return (
+            <Link
+              key={item.name}
+              href={hasAccess ? item.href : '/billing'}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : hasAccess
+                    ? 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    : 'text-muted-foreground/50 cursor-not-allowed'
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.name}
+              {item.isNew && hasAccess && (
+                <Badge className="ml-auto text-[10px] px-1.5 py-0 bg-gradient-to-r from-violet-500 to-purple-500 text-white border-0">
+                  NEW
+                </Badge>
+              )}
               {item.tier && !hasAccess && (
                 <Badge variant="outline" className="ml-auto text-xs">
                   {item.tier}

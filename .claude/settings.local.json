@@ -17,7 +17,9 @@
       "Bash(git add:*)",
       "Bash(.venvScriptsActivate.ps1)",
       "Bash(c:/Users/lavan/Desktop/sentiment-analyzer/venv/Scripts/python.exe:*)",
-      "Bash(c:/Users/lavan/Desktop/sentiment-analyzer/venv/Scripts/pip.exe install:*)"
+      "Bash(c:/Users/lavan/Desktop/sentiment-analyzer/venv/Scripts/pip.exe install:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Replace Stripe with Razorpay and add demo mode\n\n- Switch payment provider from Stripe to Razorpay for Indian market\n- Add webhook-free payment verification flow\n- Add demo dashboard with sample analytics data\n- Update pricing to INR \\(₹1,499 Starter, ₹3,999 Pro\\)\n- Add shop domain input for Judge.me OAuth flow\n- Add /api/v1/demo/* endpoints for testing without auth\n- Add /api/v1/billing/verify and /sync endpoints\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }
